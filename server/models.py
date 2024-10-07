@@ -3,13 +3,14 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import validates
 from sqlalchemy_serializer import SerializerMixin
 
-# Metadata to set naming convention for foreign keys
+# Metadata to define naming convention for foreign keys
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
 
 db = SQLAlchemy(metadata=metadata)
 
+# Hero model
 class Hero(db.Model, SerializerMixin):
     __tablename__ = 'heroes'
 
@@ -17,7 +18,7 @@ class Hero(db.Model, SerializerMixin):
     name = db.Column(db.String)
     super_name = db.Column(db.String)
 
-    # Relationship to HeroPower; no backref here to avoid conflict
+    # Relationship to HeroPower
     hero_powers = db.relationship('HeroPower', back_populates='hero', cascade='all, delete-orphan')
 
     def to_dict(self):
@@ -30,7 +31,7 @@ class Hero(db.Model, SerializerMixin):
     def __repr__(self):
         return f'<Hero {self.id}>'
 
-
+# Power model
 class Power(db.Model, SerializerMixin):
     __tablename__ = 'powers'
 
@@ -38,7 +39,7 @@ class Power(db.Model, SerializerMixin):
     name = db.Column(db.String)
     description = db.Column(db.String)
 
-    # Relationship to HeroPower; no backref here to avoid conflict
+    # Relationship to HeroPower
     hero_powers = db.relationship('HeroPower', back_populates='power', cascade='all, delete-orphan')
 
     def to_dict(self):
@@ -48,6 +49,7 @@ class Power(db.Model, SerializerMixin):
             "description": self.description
         }
 
+    # Validator for description length
     @validates('description')
     def validate_description(self, key, description):
         if len(description) < 20:
@@ -57,7 +59,7 @@ class Power(db.Model, SerializerMixin):
     def __repr__(self):
         return f'<Power {self.id}>'
 
-
+# HeroPower model (many-to-many relationship between Hero and Power)
 class HeroPower(db.Model, SerializerMixin):
     __tablename__ = 'hero_powers'
 
@@ -66,7 +68,7 @@ class HeroPower(db.Model, SerializerMixin):
     hero_id = db.Column(db.Integer, db.ForeignKey('heroes.id'), nullable=False)
     power_id = db.Column(db.Integer, db.ForeignKey('powers.id'), nullable=False)
 
-    # Relationship to Hero and Power
+    # Relationships to Hero and Power
     hero = db.relationship('Hero', back_populates='hero_powers')
     power = db.relationship('Power', back_populates='hero_powers')
 
@@ -80,6 +82,7 @@ class HeroPower(db.Model, SerializerMixin):
             "power": self.power.to_dict() if self.power else None
         }
 
+    # Validator for strength
     @validates('strength')
     def validate_strength(self, key, strength):
         if strength not in ['Strong', 'Weak', 'Average']:
