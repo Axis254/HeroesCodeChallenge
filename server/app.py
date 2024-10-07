@@ -20,7 +20,7 @@ db.init_app(app)
 # Home route
 @app.route('/')
 def index():
-    return '<h1>Superheroes Code Challenge</h1>'
+    return '<h1>Code Challenge</h1>'
 
 # Get all heroes
 @app.route('/heroes', methods=['GET'])

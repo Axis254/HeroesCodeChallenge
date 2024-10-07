@@ -60,7 +60,7 @@ class Power(db.Model, SerializerMixin):
         return f'<Power {self.id}>'
 
 # HeroPower model (many-to-many relationship between Hero and Power)
-class HeroPower(db.Model, SerializerMixin):
+class HeroPower(db.Model):
     __tablename__ = 'hero_powers'
 
     id = db.Column(db.Integer, primary_key=True)
